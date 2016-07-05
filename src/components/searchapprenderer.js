@@ -3,9 +3,13 @@ import QueryInput from './queryinput';
 import Stats from './stats';
 import Results from './results';
 import Pager from './pager';
+import TermFacetList from './termfacetlist';
 import conf from '../conf';
 
+
 const SearchAppRenderer = props => {
+  console.log("FIXME SearchAppRenderer props:", props);
+
   const params = props.solrConnector.searchParams;
   const response = props.solrConnector.response ?
     props.solrConnector.response.response : null;
@@ -29,11 +33,17 @@ const SearchAppRenderer = props => {
     </div>;
 
     if (haveResults) {
+      const facets = props.solrConnector.response.facets;
+
       row3 = <div className="row app_vsp15">
         <Results searchResults={response.docs}/>
         <div className="col-sm-4">
           <h5>Manufacturer:</h5>
-          FIXME
+          <TermFacetList multiselect={false}
+            facet={"manufacturer"}
+            buckets={facets.manufacturer.buckets}
+            filters={[]}
+            handleActions={props.handleActions} />
           <h5 className="app_vsp15">Category:</h5>
           FIXME
           <h5 className="app_vsp15">Price range:</h5>

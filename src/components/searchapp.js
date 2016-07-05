@@ -10,9 +10,9 @@ import { SET_FILTER_ACTION,
 
 
 class SearchApp extends React.Component {
-
   render() {
     const searchParams = this.getSolrSearchParams();
+    console.log("FIXME searchapp.render", searchParams);
     return <SolrConnector searchParams={searchParams}>
       <SearchAppRenderer handleActions={this.handleActions.bind(this)}/>
     </SolrConnector>;
@@ -22,27 +22,14 @@ class SearchApp extends React.Component {
     let searchParams = this.getUrlSearchParams();
 
     actions.forEach(act => {
-      if (act.type === SET_FILTER_ACTION) {
-        // const f = queryParams.filters || [];    // default empty array
-        // queryParams = update(queryParams, {
-        //   filters: { $set: act.apply ?
-        //     f.concat([act.filter]) :            // add the new filter
-        //     f.filter(x => x != act.filter)      // or remove it
-        // }});
-      }
-      else if (act.type === CLEAR_FILTERS_ACTION) {
-        // if (queryParams.filters) {
-        //   const prefix = act.fieldname + ":";
-        //   const filters = queryParams.filters.filter(x =>
-        //     !x.startsWith(prefix));
-        //   queryParams = update(queryParams, { filters: { $set: filters }});
-        // }
-      }
-      else if (act.type === SET_QUERY_ACTION) {
+      if (act.type === SET_QUERY_ACTION) {
         searchParams = update(searchParams, { query: { $set: act.query }});
       }
       else if (act.type === SET_PAGE_ACTION) {
         searchParams = update(searchParams, { page: { $set: act.page }});
+      }
+      else {
+        console.log("FIXME action=", act);
       }
     });
 
@@ -53,10 +40,19 @@ class SearchApp extends React.Component {
   // extract the raw search params from the URL
   getUrlSearchParams() {
     const urlquery = this.props.location.query;
-    return {
+    let ret = {
       query: urlquery.query || "",
       page: parseInt(urlquery.page || 0)
-    }
+    };
+
+    // collect facet filters
+    Object.keys(urlquery).forEach(key => {
+      if (key.startsWith("filter.")) {
+        ret[key] = urlquery[key];
+      }
+    });
+
+    return ret;
   }
 
   // get search params for SolrConnector
@@ -66,7 +62,8 @@ class SearchApp extends React.Component {
       solrSearchUrl: conf.solrSearchUrl,
       query: params.query,
       offset: params.page * conf.pageSize,
-      length: conf.pageSize
+      length: conf.pageSize,
+      facet: conf.facet
     }
   }
 
