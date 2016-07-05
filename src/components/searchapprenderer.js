@@ -13,9 +13,6 @@ const SearchAppRenderer = props => {
     props.solrConnector.response.responseHeader : null;
   const haveResults = response && response.numFound > 0;
 
-  console.log("FIXME props", props);
-  console.log("FIXME haveResults", haveResults);
-
   let row2 = null;
   let row3 = null;
   let row4 = null;

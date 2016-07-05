@@ -12,14 +12,14 @@ import { SET_FILTER_ACTION,
 class SearchApp extends React.Component {
 
   render() {
-    const searchParams = this.getSearchParams();
+    const searchParams = this.getSolrSearchParams();
     return <SolrConnector searchParams={searchParams}>
       <SearchAppRenderer handleActions={this.handleActions.bind(this)}/>
     </SolrConnector>;
   }
 
   handleActions(actions) {
-    let searchParams = this.getSearchParams();
+    let searchParams = this.getUrlSearchParams();
 
     actions.forEach(act => {
       if (act.type === SET_FILTER_ACTION) {
@@ -42,17 +42,35 @@ class SearchApp extends React.Component {
         searchParams = update(searchParams, { query: { $set: act.query }});
       }
       else if (act.type === SET_PAGE_ACTION) {
-        // queryParams = update(queryParams, { page: { $set: act.page }});
+        searchParams = update(searchParams, { page: { $set: act.page }});
       }
     });
 
-    // set the new search params
-    this.setSearchParams(searchParams);
+    // set the new search params (in the query string)
+    this.context.router.push({ query: searchParams });
   }
 
-  getSearchParams() {
-    const query = this.props.location.query.query || "";
-    // const page = parseInt(props.location.query.page || 0);
+  // extract the raw search params from the URL
+  getUrlSearchParams() {
+    const urlquery = this.props.location.query;
+    return {
+      query: urlquery.query || "",
+      page: parseInt(urlquery.page || 0)
+    }
+  }
+
+  // get search params for SolrConnector
+  getSolrSearchParams() {
+    const params = this.getUrlSearchParams();
+    return {
+      solrSearchUrl: conf.solrSearchUrl,
+      query: params.query,
+      offset: params.page * conf.pageSize,
+      length: conf.pageSize
+    }
+  }
+
+
     // let filters = [];
     // if (props.location.query.filt) {
     //   if (props.location.query.filt instanceof Array) {
@@ -62,17 +80,6 @@ class SearchApp extends React.Component {
     //   }
     // }
 
-    return {
-      solrSearchUrl: conf.solrSearchUrl,
-      query
-    };
-  }
-
-  setSearchParams(params) {
-    this.context.router.push({ query: {
-      query: params.query
-    }});
-  }
 }
 
 SearchApp.contextTypes = {
