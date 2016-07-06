@@ -2,7 +2,6 @@ import React, { PropTypes } from 'react';
 import update from 'react-addons-update';
 import SolrConnector from 'react-solr-connector';
 import SearchAppRenderer from './searchapprenderer';
-import { arrayise } from '../utils';
 import conf from '../conf';
 import { SET_FILTER_ACTION,
          CLEAR_FILTERS_ACTION,
@@ -33,7 +32,7 @@ class SearchApp extends React.Component {
       }
       else if (act.type === SET_FILTER_ACTION) {
         const paramName = "filter_" + act.facet;
-        const curValues = arrayise(params[paramName], []);
+        const curValues = [].concat(params[paramName] || []);
         const newValues = act.apply ?
           curValues.concat(act.value) :
           curValues.filter(v => v != act.value);
@@ -74,7 +73,7 @@ class SearchApp extends React.Component {
     Object.keys(params).forEach(key => {
       if (key.startsWith("filter_")) {
         const mapval = facetMap[key.slice(7)];
-        const terms = arrayise(params[key]).map(v => `"${v}"`).join(" OR ");
+        const terms = [].concat(params[key]).map(v => `"${v}"`).join(" OR ");
         const tag = mapval.tag ? `{!tag=${mapval.tag}}` : "";
         solrParams.filter.push(`${tag}${mapval.field}:(${terms})`);
       }

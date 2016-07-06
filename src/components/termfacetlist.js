@@ -1,6 +1,5 @@
 import React, { Component, PropTypes } from 'react';
 import { makeSetFilterAction, makeClearFiltersAction } from "../actions";
-import { arrayise } from "../utils";
 
 const COLLAPSED_LENGTH = 5;
 
@@ -43,7 +42,7 @@ class TermFacetList extends Component {
      * use links.
      */
 
-   const filters = arrayise(this.props.filters, []);
+   const filters = [].concat(this.props.filters || []);
    let haveSelectedValue = false;
    let facitems = null;
 
