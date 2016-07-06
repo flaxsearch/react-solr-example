@@ -2,6 +2,7 @@ import React, { PropTypes } from 'react';
 import update from 'react-addons-update';
 import SolrConnector from 'react-solr-connector';
 import SearchAppRenderer from './searchapprenderer';
+import { arrayise } from '../utils';
 import conf from '../conf';
 import { SET_FILTER_ACTION,
          CLEAR_FILTERS_ACTION,
@@ -11,72 +12,76 @@ import { SET_FILTER_ACTION,
 
 class SearchApp extends React.Component {
   render() {
-    const searchParams = this.getSolrSearchParams();
-    console.log("FIXME searchapp.render", searchParams);
-    return <SolrConnector searchParams={searchParams}>
-      <SearchAppRenderer handleActions={this.handleActions.bind(this)}/>
+    return <SolrConnector searchParams={this.getSolrSearchParams()}>
+      <SearchAppRenderer searchParams={this.getUrlSearchParams()}
+                         handleActions={this.handleActions.bind(this)}/>
     </SolrConnector>;
   }
 
   handleActions(actions) {
-    let searchParams = this.getUrlSearchParams();
-
-    actions.forEach(act => {
+    const newParams = actions.reduce((params, act) => {
       if (act.type === SET_QUERY_ACTION) {
-        searchParams = update(searchParams, { query: { $set: act.query }});
+        return update(params, { query: { $set: act.query }});
       }
       else if (act.type === SET_PAGE_ACTION) {
-        searchParams = update(searchParams, { page: { $set: act.page }});
+        return update(params, { page: { $set: act.page }});
+      }
+      else if (act.type === CLEAR_FILTERS_ACTION) {
+        let updater = {};
+        updater["filter_" + act.facet] = { $set: [] };
+        return update(params, updater);
+      }
+      else if (act.type === SET_FILTER_ACTION) {
+        const paramName = "filter_" + act.facet;
+        const curValues = arrayise(params[paramName], []);
+        const newValues = act.apply ?
+          curValues.concat(act.value) :
+          curValues.filter(v => v != act.value);
+        let updater = {};
+        updater[paramName] = { $set: newValues };
+        return update(params, updater);
       }
       else {
         console.log("FIXME action=", act);
+        return params;
       }
-    });
+    }, this.getUrlSearchParams());
 
     // set the new search params (in the query string)
-    this.context.router.push({ query: searchParams });
+    this.context.router.push({ query: newParams });
   }
 
-  // extract the raw search params from the URL
   getUrlSearchParams() {
-    const urlquery = this.props.location.query;
-    let ret = {
-      query: urlquery.query || "",
-      page: parseInt(urlquery.page || 0)
-    };
-
-    // collect facet filters
-    Object.keys(urlquery).forEach(key => {
-      if (key.startsWith("filter.")) {
-        ret[key] = urlquery[key];
-      }
-    });
-
-    return ret;
+    return Object.assign({}, this.props.location.query);
   }
 
   // get search params for SolrConnector
   getSolrSearchParams() {
     const params = this.getUrlSearchParams();
-    return {
+    const page = parseInt(params.page || 0);
+    let solrParams = {
       solrSearchUrl: conf.solrSearchUrl,
-      query: params.query,
-      offset: params.page * conf.pageSize,
+      query: params.query || "",
+      offset: page * conf.pageSize,
       length: conf.pageSize,
-      facet: conf.facet
-    }
+      facet: conf.facet,
+      filter: []
+    };
+
+    const facetMap = makeFacetMap();
+
+    // add filters
+    Object.keys(params).forEach(key => {
+      if (key.startsWith("filter_")) {
+        const mapval = facetMap[key.slice(7)];
+        const terms = arrayise(params[key]).map(v => `"${v}"`).join(" OR ");
+        const tag = mapval.tag ? `{!tag=${mapval.tag}}` : "";
+        solrParams.filter.push(`${tag}${mapval.field}:(${terms})`);
+      }
+    });
+
+    return solrParams;
   }
-
-
-    // let filters = [];
-    // if (props.location.query.filt) {
-    //   if (props.location.query.filt instanceof Array) {
-    //     filters = props.location.query.filt.slice(0);
-    //   } else {
-    //     filters = [ props.location.query.filt ];
-    //   }
-    // }
-
 }
 
 SearchApp.contextTypes = {
@@ -87,5 +92,16 @@ SearchApp.propTypes = {
   location: PropTypes.object.isRequired
 };
 
+function makeFacetMap() {
+  return Object.keys(conf.facet).reduce((o, key) => {
+    const fac = conf.facet[key];
+    if (fac.type == "field") {
+      const tag = (fac.domain && fac.domain.excludeTags) ?
+        fac.domain.excludeTags : undefined;
+      o[key] = { field: fac.field, tag };
+    }
+    return o;
+  }, {});
+}
 
 export default SearchApp;

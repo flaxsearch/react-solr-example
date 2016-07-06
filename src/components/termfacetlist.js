@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { makeSetFilterAction, makeClearFiltersAction } from "../actions";
+import { arrayise } from "../utils";
 
 const COLLAPSED_LENGTH = 5;
 
@@ -42,21 +43,22 @@ class TermFacetList extends Component {
      * use links.
      */
 
+   const filters = arrayise(this.props.filters, []);
    let haveSelectedValue = false;
-
    let facitems = null;
+
    if (this.props.multiselect) {
       facitems = buckets.map(bucket => {
         const key = "facet_" + bucket.val;
 
-        const selected = this.props.filters.find(
+        const selected = filters.find(
           term => term === bucket.val) != undefined;
 
         haveSelectedValue = haveSelectedValue || selected;
 
         const handler = (event) => {
           event.preventDefault();
-          this.setFac(event.target.value, event.target.checked);
+          this.setFilter(event.target.value, event.target.checked);
         };
 
         return <li key={key}>
@@ -69,7 +71,7 @@ class TermFacetList extends Component {
       facitems = buckets.map(bucket => {
         const key = "facet_" + bucket.val;
 
-        const selected = this.props.filters.find(
+        const selected = filters.find(
           term => term === bucket.val) != undefined;
 
         haveSelectedValue = haveSelectedValue || selected;
@@ -102,8 +104,8 @@ class TermFacetList extends Component {
     /*
      * the "any" link should only be active when a facet is selected
      */
-    const any = haveSelectedValue ? <em>any</em> :
-      <a href="#" onClick={this.unsetAll.bind(this)}><em>any</em></a>;
+    const any = haveSelectedValue ? <a href="#"onClick={this.unsetAll.bind(this)}>
+      <em>any</em></a> : <em>any</em>;
 
     return <ul className="app_ul">
       {facitems}
@@ -147,7 +149,7 @@ TermFacetList.propTypes = {
     val: PropTypes.string,
     count: PropTypes.number
   })),
-  filters: PropTypes.arrayOf(PropTypes.string),
+  filters: PropTypes.oneOfType([PropTypes.array, PropTypes.string]),
   handleActions: PropTypes.func
 };
 

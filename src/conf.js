@@ -4,7 +4,13 @@ export default {
   facet: {
     manufacturer: {
       type: "field",
-      field: "manu_id_s"
+      field: "manu_id_s",
+      domain: { excludeTags: "MANU" }
+    },
+    category: {
+      type: "field",
+      field: "cat",
+      domain: { excludeTags: "CAT" }
     },
     price_0_100: {
       type: "query",
@@ -12,7 +18,7 @@ export default {
     },
     price_101_: {
       type: "query",
-      q: "price:[100 TO *]"      
+      q: "price:[100 TO *]"
     }
   }
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 import QueryInput from './queryinput';
 import Stats from './stats';
 import Results from './results';
@@ -10,7 +10,6 @@ import conf from '../conf';
 const SearchAppRenderer = props => {
   console.log("FIXME SearchAppRenderer props:", props);
 
-  const params = props.solrConnector.searchParams;
   const response = props.solrConnector.response ?
     props.solrConnector.response.response : null;
   const header = props.solrConnector.response ?
@@ -42,10 +41,14 @@ const SearchAppRenderer = props => {
           <TermFacetList multiselect={false}
             facet={"manufacturer"}
             buckets={facets.manufacturer.buckets}
-            filters={[]}
+            filters={props.searchParams.filter_manufacturer}
             handleActions={props.handleActions} />
           <h5 className="app_vsp15">Category:</h5>
-          FIXME
+          <TermFacetList multiselect={true}
+            facet={"category"}
+            buckets={facets.category.buckets}
+            filters={props.searchParams.filter_category}
+            handleActions={props.handleActions} />
           <h5 className="app_vsp15">Price range:</h5>
           FIXME
         </div>
@@ -70,7 +73,8 @@ const SearchAppRenderer = props => {
 
   return <div className="container">
     <div className="row">
-      <QueryInput initialQuery={params.query} handleActions={props.handleActions}/>
+      <QueryInput initialQuery={props.searchParams.query}
+                  handleActions={props.handleActions} />
     </div>
     {row2} {row3} {row4}
     {busy}
@@ -78,5 +82,8 @@ const SearchAppRenderer = props => {
 
 };
 
+SearchAppRenderer.propTypes = {
+  searchParams: PropTypes.object
+};
 
 export default SearchAppRenderer;
