@@ -18,6 +18,7 @@ class SearchApp extends React.Component {
   }
 
   handleActions(actions) {
+    console.log("FIXME handleActions", actions);
     const newParams = actions.reduce((params, act) => {
       if (act.type === SET_QUERY_ACTION) {
         return update(params, { query: { $set: act.query }});
@@ -46,6 +47,8 @@ class SearchApp extends React.Component {
       }
     }, this.getUrlSearchParams());
 
+    console.log("FIXME newParams", newParams);
+
     // set the new search params (in the query string)
     this.context.router.push({ query: newParams });
   }
@@ -73,9 +76,13 @@ class SearchApp extends React.Component {
     Object.keys(params).forEach(key => {
       if (key.startsWith("filter_")) {
         const mapval = facetMap[key.slice(7)];
-        const terms = [].concat(params[key]).map(v => `"${v}"`).join(" OR ");
-        const tag = mapval.tag ? `{!tag=${mapval.tag}}` : "";
-        solrParams.filter.push(`${tag}${mapval.field}:(${terms})`);
+        if (mapval) {
+          const terms = [].concat(params[key]).map(v => `"${v}"`).join(" OR ");
+          const tag = mapval.tag ? `{!tag=${mapval.tag}}` : "";
+          solrParams.filter.push(`${tag}${mapval.field}:(${terms})`);
+        } else {
+          console.log("FIXME unknown filter", key);
+        }
       }
     });
 

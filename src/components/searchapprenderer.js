@@ -4,6 +4,7 @@ import Stats from './stats';
 import Results from './results';
 import Pager from './pager';
 import TermFacetList from './termfacetlist';
+import QueryFacetList from './queryfacetlist';
 import conf from '../conf';
 
 
@@ -50,7 +51,14 @@ const SearchAppRenderer = props => {
             filters={props.searchParams.filter_category}
             handleActions={props.handleActions} />
           <h5 className="app_vsp15">Price range:</h5>
-          FIXME
+          <QueryFacetList multiselect={false}
+            facets={[
+              { facet: "price_0_100", label: "Up to £100"},
+              { facet: "price_101_", label: "Over £100" }
+            ]}
+            facetData={facets}
+            searchParams={props.searchParams}
+            handleActions={props.handleActions} />
         </div>
       </div>;
 
