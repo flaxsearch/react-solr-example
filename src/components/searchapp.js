@@ -18,7 +18,6 @@ class SearchApp extends React.Component {
   }
 
   handleActions(actions) {
-    console.log("FIXME handleActions", actions);
     const newParams = actions.reduce((params, act) => {
       if (act.type === SET_QUERY_ACTION) {
         return update(params, { query: { $set: act.query }});
@@ -42,12 +41,10 @@ class SearchApp extends React.Component {
         return update(params, updater);
       }
       else {
-        console.log("FIXME action=", act);
+        console.log("unknown action=", act);
         return params;
       }
     }, this.getUrlSearchParams());
-
-    console.log("FIXME newParams", newParams);
 
     // set the new search params (in the query string)
     this.context.router.push({ query: newParams });
@@ -77,9 +74,14 @@ class SearchApp extends React.Component {
       if (key.startsWith("filter_")) {
         const mapval = facetMap[key.slice(7)];
         if (mapval) {
-          const terms = [].concat(params[key]).map(v => `"${v}"`).join(" OR ");
           const tag = mapval.tag ? `{!tag=${mapval.tag}}` : "";
-          solrParams.filter.push(`${tag}${mapval.field}:(${terms})`);
+          if (mapval.field) {
+            const terms = [].concat(params[key]).map(v => `"${v}"`).join(" OR ");
+            solrParams.filter.push(`${tag}${mapval.field}:(${terms})`);
+          }
+          else if (mapval.query) {
+            solrParams.filter.push(`${tag}${mapval.query}`);
+          }
         } else {
           console.log("FIXME unknown filter", key);
         }
@@ -101,10 +103,12 @@ SearchApp.propTypes = {
 function makeFacetMap() {
   return Object.keys(conf.facet).reduce((o, key) => {
     const fac = conf.facet[key];
+    const tag = (fac.domain && fac.domain.excludeTags) ?
+      fac.domain.excludeTags : undefined;
     if (fac.type == "field") {
-      const tag = (fac.domain && fac.domain.excludeTags) ?
-        fac.domain.excludeTags : undefined;
       o[key] = { field: fac.field, tag };
+    } else if (fac.type == "query") {
+      o[key] = { query: fac.q, tag };
     }
     return o;
   }, {});

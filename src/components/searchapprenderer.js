@@ -51,8 +51,7 @@ const SearchAppRenderer = props => {
             filters={props.searchParams.filter_category}
             handleActions={props.handleActions} />
           <h5 className="app_vsp15">Price range:</h5>
-          <QueryFacetList multiselect={false}
-            facets={[
+          <QueryFacetList facets={[
               { facet: "price_0_100", label: "Up to £100"},
               { facet: "price_101_", label: "Over £100" }
             ]}

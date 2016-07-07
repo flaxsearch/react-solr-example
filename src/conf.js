@@ -14,11 +14,13 @@ export default {
     },
     price_0_100: {
       type: "query",
-      q: "price:[0 TO 100]"
+      q: "price:[0 TO 100]",
+      domain: { excludeTags: "PRI" }
     },
     price_101_: {
       type: "query",
-      q: "price:[100 TO *]"
+      q: "price:[100 TO *]",
+      domain: { excludeTags: "PRI" }
     }
   }
 };
