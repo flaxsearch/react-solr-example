@@ -12,6 +12,10 @@ import { makeSetFilterAction, makeClearFiltersAction } from "../actions";
  */
 
 class QueryFacetList extends Component {
+  constructor() {
+    super();
+    this.unsetAll = this.unsetAll.bind(this);
+  }
   render() {
    const searchParamKeys = Object.keys(this.props.searchParams);
    let haveSelectedValue = false;
@@ -43,7 +47,7 @@ class QueryFacetList extends Component {
     /*
      * the "any" link should only be active when a facet is selected
      */
-    const any = haveSelectedValue ? <a href="#" onClick={this.unsetAll.bind(this)}>
+    const any = haveSelectedValue ? <a href="#" onClick={this.unsetAll}>
       <em>any</em></a> : <em>any</em>;
 
     return <ul className="app_ul">

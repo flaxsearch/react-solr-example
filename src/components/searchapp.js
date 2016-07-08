@@ -10,10 +10,15 @@ import { SET_FILTER_ACTION,
 
 
 class SearchApp extends React.Component {
+  constructor() {
+    super();
+    this.handleActions = this.handleActions.bind(this);
+  }
+
   render() {
     return <SolrConnector searchParams={this.getSolrSearchParams()}>
       <SearchAppRenderer searchParams={this.getUrlSearchParams()}
-                         handleActions={this.handleActions.bind(this)}/>
+                         handleActions={this.handleActions}/>
     </SolrConnector>;
   }
 

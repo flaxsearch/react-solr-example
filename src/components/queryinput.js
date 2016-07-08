@@ -16,6 +16,8 @@ class QueryInput extends Component {
   constructor(props) {
     super(props);
     this.state = { query: props.initialQuery || "" };
+    this.onSubmit = this.onSubmit.bind(this);
+    this.onChange = this.onChange.bind(this);
   }
 
   /*
@@ -32,10 +34,10 @@ class QueryInput extends Component {
 
   render() {
     return <form className="navbar-form"
-            role="search" onSubmit={this.onSubmit.bind(this)}>
+            role="search" onSubmit={this.onSubmit}>
       <div className="input-group col-sm-8">
         <input type="text" className="form-control" placeholder="Search"
-          value={this.state.query} onChange={this.onChange.bind(this)} />
+          value={this.state.query} onChange={this.onChange} />
         <div className="input-group-btn">
           <button className="btn btn-primary" type="submit"><i className="glyphicon glyphicon-search"></i></button>
         </div>

@@ -20,6 +20,9 @@ class TermFacetList extends Component {
     this.state = {
       collapsed: true   // hide more than COLLAPSED_LENGTH?
     }
+
+    this.toggleShowAll = this.toggleShowAll.bind(this);
+    this.unsetAll = this.unsetAll.bind(this);
   }
 
   render() {
@@ -96,14 +99,14 @@ class TermFacetList extends Component {
      * display a collapse toggle?
      */
     const collapseLink = collapsible ?
-      <li><a href="#" onClick={this.toggleShowAll.bind(this)}>
+      <li><a href="#" onClick={this.toggleShowAll}>
         <em>{this.state.collapsed ? "show more" : "show fewer"}</em>
         </a></li> : "";
 
     /*
      * the "any" link should only be active when a facet is selected
      */
-    const any = haveSelectedValue ? <a href="#"onClick={this.unsetAll.bind(this)}>
+    const any = haveSelectedValue ? <a href="#"onClick={this.unsetAll}>
       <em>any</em></a> : <em>any</em>;
 
     return <ul className="app_ul">
