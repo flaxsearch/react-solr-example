@@ -9,10 +9,10 @@ import conf from '../conf';
 
 
 const SearchAppRenderer = props => {
-  console.log("FIXME SearchAppRenderer props:", props);
-
   const response = props.solrConnector.response ?
     props.solrConnector.response.response : null;
+  const hl = props.solrConnector.response ?
+    props.solrConnector.response.highlighting : null;
   const header = props.solrConnector.response ?
     props.solrConnector.response.responseHeader : null;
   const haveResults = response && response.numFound > 0;
@@ -35,8 +35,8 @@ const SearchAppRenderer = props => {
     if (haveResults) {
       const facets = props.solrConnector.response.facets;
 
-      row3 = <div className="row app_vsp15">
-        <Results searchResults={response.docs}/>
+      row3 = <div className="row">
+        <Results searchResults={response.docs} highlighting={hl}/>
         <div className="col-sm-4">
           <h5>Manufacturer:</h5>
           <TermFacetList multiselect={false}
@@ -44,13 +44,13 @@ const SearchAppRenderer = props => {
             buckets={facets.manufacturer.buckets}
             filters={props.searchParams.filter_manufacturer}
             handleActions={props.handleActions} />
-          <h5 className="app_vsp15">Category:</h5>
+          <h5 className="app_vsp25">Category:</h5>
           <TermFacetList multiselect={true}
             facet={"category"}
             buckets={facets.category.buckets}
             filters={props.searchParams.filter_category}
             handleActions={props.handleActions} />
-          <h5 className="app_vsp15">Price range:</h5>
+          <h5 className="app_vsp25">Price range:</h5>
           <QueryFacetList facets={[
               { facet: "price_0_100", label: "Up to £100"},
               { facet: "price_101_", label: "Over £100" }

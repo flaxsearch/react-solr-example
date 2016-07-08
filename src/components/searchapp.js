@@ -69,6 +69,7 @@ class SearchApp extends React.Component {
       offset: page * conf.pageSize,
       length: conf.pageSize,
       facet: conf.facet,
+      highlightParams: conf.highlightParams,
       filter: []
     };
 

@@ -22,5 +22,11 @@ export default {
       q: "price:[100 TO *]",
       domain: { excludeTags: "PRI" }
     }
+  },
+  highlightParams: {
+    "hl": "on",
+    "hl.fl": "name",
+    "hl.snippets": 1,
+    "hl:fragsize": 1000
   }
 };
